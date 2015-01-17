@@ -84,7 +84,7 @@
 
 ;; The Helm datasource itself
 
-(defun helm-pages-name (&optional name)
+(defun helm-pages-name (&optional _name)
   "Get the name of the Helm pages source, for the user, where NAME is Helm's name."
   (with-helm-current-buffer
     (or
