@@ -4,8 +4,8 @@
 
 ;; Author: David Christiansen <david@davidchristiansen.dk>
 ;; Keywords: convenience, helm, outlines
-;; Package-Requires: ((helm "0.0.0") (emacs "24"))
-;; Version: 0.1
+;; Package-Requires: ((helm "1.6.5") (emacs "24") (cl-lib "0.5"))
+;; Version: 0.1.1
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
