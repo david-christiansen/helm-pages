@@ -1,0 +1,8 @@
+* helm-pages
+
+This Helm data source is very much like =pages-directory= in
+=page-ext.el= that comes with Emacs. However, rather than having a
+custom interface, it uses Helm.
+
+To use it, just bind =helm-pages= (or invoke manually using =M-x
+helm-pages=).
