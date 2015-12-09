@@ -119,7 +119,7 @@
   "View the pages in the current buffer with Helm."
   (interactive)
   (helm :sources '(helm-pages-source)
-        :buffer "*helm-pages"))
+        :buffer "*helm-pages*"))
 
 (provide 'helm-pages)
 ;;; helm-pages.el ends here
