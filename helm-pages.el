@@ -22,70 +22,70 @@
 
 ;;; Commentary:
 
-;; 
+;; Use the `helm' framework to navigate pages in a buffer.
 
 ;;; Code:
+
 (require 'cl-lib)
 (require 'helm)
 (require 'helm-grep)
-
 
-;; Functions for getting information about the pages in the buffer
+;;; Functions for getting information about the pages in the buffer
 
 (defun helm-pages-get-next-header ()
-  "Get the next non-blank line after POINT."
+  "Return the next non-blank line after point."
   (with-helm-current-buffer
-    (save-restriction
-      (save-excursion
-        (narrow-to-page)
-        (beginning-of-line)
-        (while (and (not (eobp))
-                    (looking-at-p "^\\s-*$"))
-          (forward-line))
-        (let* ((start (progn (beginning-of-line) (point)))
-               (end (progn (end-of-line) (point))))
-          (buffer-substring start end))))))
+    (save-excursion
+      (save-restriction
+	(narrow-to-page)
+	(beginning-of-line)
+	(while (and (not (eobp))
+		    (looking-at-p "^\\s-*$"))
+	  (forward-line))
+	(let* ((start (progn (beginning-of-line) (point)))
+	       (end (progn (end-of-line) (point))))
+	  (buffer-substring start end))))))
 
 (defun helm-pages-get-pages ()
-  "Get a list of (POS . HEADER) pairs, where POS denotes the beginning of a page and HEADER is the contents of the first non-blank line in that page."
+  "Return a list of (POS . HEADER) pairs.
+
+POS is the position of the beginning of a page.  HEADER is the
+page's first non-blank line ."
   (with-helm-current-buffer
-    (save-restriction
-      (widen)
-      (save-excursion
-        (goto-char (point-min))
-        (let ((pages (list (cons (point) (helm-pages-get-next-header)))))
-
-          (while (re-search-forward page-delimiter nil t)
-            (push (cons (match-beginning 0) (helm-pages-get-next-header))
-                  pages))
-          (nreverse pages))))))
-
+    (save-excursion
+      (save-restriction
+	(widen)
+	(goto-char (point-min))
+	(let ((pages (list (cons (point) (helm-pages-get-next-header)))))
+	  (while (re-search-forward page-delimiter nil t)
+	    (forward-line)
+	    (push (cons (point) (helm-pages-get-next-header))
+		  pages))
+	  (nreverse pages))))))
 
-;; Functions implementing Helm commands
+;;; Functions for Helm commands
 
 (defun helm-pages-goto-page (pos)
-  "Go to the page at POS, preserving narrowing."
+  "Go to the page at position POS, preserving narrowing."
   (with-helm-current-buffer
     (let ((narrowed (buffer-narrowed-p)))
       (widen)
       (goto-char pos)
-      (forward-line)
       (recenter-top-bottom 0)
       (when narrowed (narrow-to-page)))))
 
 (defun helm-pages-narrow-to-page (pos)
-  "Narrow to the page at POS."
+  "Narrow buffer to the page at position POS."
   (with-helm-current-buffer
     (goto-char pos)
-    (forward-line)
     (recenter-top-bottom 0)
     (narrow-to-page)))
-
 
-;; The Helm datasource itself
+;;; Helm data source
 
 (defun helm-pages-name (&optional _name)
-  "Get the name of the Helm pages source, for the user, where NAME is Helm's name."
+  "Get the name of the `helm-pages' source.
+Optional argument _NAME is Helm's name."
   (with-helm-current-buffer
     (or
      (ignore-errors (concat "Pages in " (buffer-name)))
@@ -95,31 +95,30 @@
   "Get the Helm view of the buffer's pages."
   (with-helm-current-buffer
     (cl-loop for (pos . header)
-             in (helm-pages-get-pages)
-             collect (let ((lineno (concat (number-to-string
-                                            (line-number-at-pos pos))
-                                           ": ")))
-                       (cons (concat (propertize lineno 'face 'helm-grep-lineno)
-                                     header)
-                             pos)))))
+	     in (helm-pages-get-pages)
+	     collect (let ((lineno (concat (number-to-string
+					    (line-number-at-pos pos))
+					   ": ")))
+		       (cons (concat (propertize lineno 'face 'helm-grep-lineno)
+				     header)
+			     pos)))))
 
 (defvar helm-pages-source
   (helm-build-sync-source "pages"
     :header-name 'helm-pages-name
     :candidates 'helm-pages-candidates
     :action (helm-make-actions
-             "Go to page" 'helm-pages-goto-page
-             "Narrow to page" 'helm-pages-narrow-to-page)
+	     "Go to page" 'helm-pages-goto-page
+	     "Narrow to page" 'helm-pages-narrow-to-page)
     :persistent-help "View page"
-    :persistent-action 'helm-pages-goto-page
-    ))
-
+    :persistent-action 'helm-pages-goto-page))
+
 ;;;###autoload
 (defun helm-pages ()
   "View the pages in the current buffer with Helm."
   (interactive)
   (helm :sources '(helm-pages-source)
-        :buffer "*helm-pages*"))
+	:buffer "*helm-pages*"))
 
 (provide 'helm-pages)
 ;;; helm-pages.el ends here
