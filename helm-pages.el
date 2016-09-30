@@ -115,6 +115,7 @@ page's first non-blank line ."
   (save-excursion
     (save-restriction
       (widen)
+      (font-lock-ensure)
       (goto-char (point-min))
       (let ((pages (list (cons (point) (helm-pages-get-next-header)))))
         (while (re-search-forward page-delimiter nil t)
