@@ -29,8 +29,24 @@
 (require 'cl-lib)
 (require 'helm)
 (require 'helm-grep)
+
 
-;;; Functions for getting information about the pages in the buffer
+;;; Customize
+
+(defgroup helm-pages nil
+  "Helm pages."
+  :prefix "helm-pages-")
+
+(defcustom helm-pages-actions
+  (helm-make-actions
+   "Go to page" 'helm-pages-goto-page
+   "Narrow to page" 'helm-pages-narrow-to-page)
+  "Actions for `helm-pages'."
+  :group 'helm-pages
+  :type '(alist :key-type string :value-type function))
+
+
+;;; Functions to get buffer pages info
 
 (defun helm-pages-get-next-header ()
   "Return the next non-blank line after point."
@@ -62,8 +78,9 @@ page's first non-blank line ."
             (push (cons (point) (helm-pages-get-next-header))
                   pages))
           (nreverse pages))))))
+
 
-;;; Functions for Helm commands
+;;; Helm actions
 
 (defun helm-pages-goto-page (pos)
   "Go to the page at position POS, preserving narrowing."
@@ -80,8 +97,17 @@ page's first non-blank line ."
     (goto-char pos)
     (recenter-top-bottom 0)
     (narrow-to-page)))
+
+(defun helm-pages-preview (pos)
+  "Preview the selected page.
+
+Intended for use as a Helm persistent action."
+  (switch-to-buffer helm-current-buffer)
+  (goto-char pos)
+  (helm-highlight-current-line))
+
 
-;;; Helm data source
+;;; Helm sources
 
 (defun helm-pages-name (&optional _name)
   "Get the name of the `helm-pages' source.
@@ -103,18 +129,19 @@ Optional argument _NAME is Helm's name."
                            pos))))
 
 
+;;; API
+
 ;;;###autoload
 (defun helm-pages ()
   "View the pages in the current buffer with Helm."
   (interactive)
   (helm :sources (helm-build-sync-source "pages"
-                   :header-name (helm-pages-name)
+                   :action helm-pages-actions
                    :candidates (helm-pages-candidates)
-                   :action (helm-make-actions
-                            "Go to page" 'helm-pages-goto-page
-                            "Narrow to page" 'helm-pages-narrow-to-page)
+                   :header-name (helm-pages-name)
+                   :persistent-action 'helm-pages-preview
                    :persistent-help "View page"
-                   :persistent-action 'helm-pages-goto-page)
+                   :follow 1)
         :buffer "*helm-pages*"))
 
 (provide 'helm-pages)
