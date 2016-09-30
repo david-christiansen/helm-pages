@@ -45,6 +45,11 @@
   :group 'helm-pages
   :type '(alist :key-type string :value-type function))
 
+(defcustom helm-pages-follow nil
+  "If true, turn on `helm-follow-mode'."
+  :group 'helm-pages
+  :type 'boolean)
+
 
 ;;; Functions to get pages info
 
@@ -181,7 +186,7 @@ Optional argument _NAME is Helm's name."
                    :candidates (helm-pages-candidates)
                    :persistent-action 'helm-pages-preview
                    :persistent-help "View page"
-                   :follow 1)
+                   :follow helm-pages-follow)
         :buffer "*helm-pages*"
         :preselect (helm-pages--page-header)))
 
