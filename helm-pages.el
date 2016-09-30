@@ -84,17 +84,16 @@ page number."
 
 (defun helm-pages-get-next-header ()
   "Return the next non-blank line after point."
-  (with-helm-current-buffer
-    (save-excursion
-      (save-restriction
-        (narrow-to-page)
-        (beginning-of-line)
-        (while (and (not (eobp))
-                    (looking-at-p "^\\s-*$"))
-          (forward-line))
-        (let* ((start (progn (beginning-of-line) (point)))
-               (end (progn (end-of-line) (point))))
-          (buffer-substring start end))))))
+  (save-excursion
+    (save-restriction
+      (narrow-to-page)
+      (beginning-of-line)
+      (while (and (not (eobp))
+                  (looking-at-p "^\\s-*$"))
+        (forward-line))
+      (let* ((start (progn (beginning-of-line) (point)))
+             (end (progn (end-of-line) (point))))
+        (buffer-substring start end)))))
 
 (defun helm-pages--page-header (&optional page-number)
   "Return the first line (header) of page PAGE-NUMBER.
@@ -113,17 +112,16 @@ page number."
 
 POS is the position of the beginning of a page.  HEADER is the
 page's first non-blank line ."
-  (with-helm-current-buffer
-    (save-excursion
-      (save-restriction
-        (widen)
-        (goto-char (point-min))
-        (let ((pages (list (cons (point) (helm-pages-get-next-header)))))
-          (while (re-search-forward page-delimiter nil t)
-            (forward-line)
-            (push (cons (point) (helm-pages-get-next-header))
-                  pages))
-          (nreverse pages))))))
+  (save-excursion
+    (save-restriction
+      (widen)
+      (goto-char (point-min))
+      (let ((pages (list (cons (point) (helm-pages-get-next-header)))))
+        (while (re-search-forward page-delimiter nil t)
+          (forward-line)
+          (push (cons (point) (helm-pages-get-next-header))
+                pages))
+        (nreverse pages)))))
 
 
 ;;; Helm actions
@@ -158,21 +156,19 @@ Intended for use as a Helm persistent action."
 (defun helm-pages-name (&optional _name)
   "Get the name of the `helm-pages' source.
 Optional argument _NAME is Helm's name."
-  (with-helm-current-buffer
-    (or
-     (ignore-errors (concat "Pages in " (buffer-name)))
-     "Pages")))
+  (or
+   (ignore-errors (concat "Pages in " (buffer-name)))
+   "Pages"))
 
 (defun helm-pages-candidates ()
   "Get the Helm view of the buffer's pages."
-  (with-helm-current-buffer
-    (cl-loop for (pos . header) in (helm-pages-get-pages)
-             for max-line-length = (length (number-to-string (count-lines (point-min) (point-max))))
-             for lineno = (number-to-string (line-number-at-pos pos))
-             collect (cons (concat (propertize (concat lineno ": ") 'face 'helm-grep-lineno)
-                                   (make-string (- max-line-length (length lineno)) ?\s)
-                                   header)
-                           pos))))
+  (cl-loop for (pos . header) in (helm-pages-get-pages)
+           for max-line-length = (length (number-to-string (count-lines (point-min) (point-max))))
+           for lineno = (number-to-string (line-number-at-pos pos))
+           collect (cons (concat (propertize (concat lineno ": ") 'face 'helm-grep-lineno)
+                                 (make-string (- max-line-length (length lineno)) ?\s)
+                                 header)
+                         pos)))
 
 
 ;;; API
