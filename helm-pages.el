@@ -135,10 +135,9 @@ Optional argument _NAME is Helm's name."
 (defun helm-pages ()
   "View the pages in the current buffer with Helm."
   (interactive)
-  (helm :sources (helm-build-sync-source "pages"
+  (helm :sources (helm-build-sync-source (helm-pages-name)
                    :action helm-pages-actions
                    :candidates (helm-pages-candidates)
-                   :header-name (helm-pages-name)
                    :persistent-action 'helm-pages-preview
                    :persistent-help "View page"
                    :follow 1)
