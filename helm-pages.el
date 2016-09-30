@@ -35,7 +35,8 @@
 
 (defgroup helm-pages nil
   "Helm pages."
-  :prefix "helm-pages-")
+  :prefix "helm-pages-"
+  :group 'helm-pages)
 
 (defcustom helm-pages-actions
   (helm-make-actions
