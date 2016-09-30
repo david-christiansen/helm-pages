@@ -1,4 +1,6 @@
-* ~helm-pages~
+[[https://melpa.org/#/helm-pages][file:https://melpa.org/packages/helm-pages-badge.svg]]
+
+* Helm Pages
 
 ** Introduction
 
