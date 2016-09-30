@@ -46,7 +46,36 @@
   :type '(alist :key-type string :value-type function))
 
 
-;;; Functions to get buffer pages info
+;;; Functions to get pages info
+
+(defun helm-pages--page-number (&optional pos)
+  "Return the page number of position POS.
+
+Optional argument POS has default value of the current point."
+  (let ((pos (or pos (point))))
+    (save-excursion
+      (save-restriction
+        (widen)
+        (let ((count 1))
+          (goto-char (point-min))
+          (while (re-search-forward page-delimiter pos t)
+            (if (= (match-beginning 0) (match-end 0))
+                (forward-char 1))
+            (setq count (1+ count)))
+          count)))))
+
+(defun helm-pages--page-start (&optional page-number)
+  "Return the starting position of page PAGE-NUMBER.
+
+Optional argument PAGE-NUMBER has default value of the current
+page number."
+  (let ((page-number (or page-number (helm-pages--page-number))))
+    (save-excursion
+      (save-restriction
+        (widen)
+        (goto-char (point-min))
+        (forward-page (1- page-number))
+        (point)))))
 
 (defun helm-pages-get-next-header ()
   "Return the next non-blank line after point."
@@ -61,6 +90,18 @@
         (let* ((start (progn (beginning-of-line) (point)))
                (end (progn (end-of-line) (point))))
           (buffer-substring start end))))))
+
+(defun helm-pages--page-header (&optional page-number)
+  "Return the first line (header) of page PAGE-NUMBER.
+
+Optional argument PAGE-NUMBER has default value of the current
+page number."
+  (let ((page-number (or page-number (helm-pages--page-number))))
+    (save-excursion
+      (save-restriction
+        (widen)
+        (goto-char (helm-pages--page-start page-number))
+        (helm-pages-get-next-header)))))
 
 (defun helm-pages-get-pages ()
   "Return a list of (POS . HEADER) pairs.
@@ -141,7 +182,8 @@ Optional argument _NAME is Helm's name."
                    :persistent-action 'helm-pages-preview
                    :persistent-help "View page"
                    :follow 1)
-        :buffer "*helm-pages*"))
+        :buffer "*helm-pages*"
+        :preselect (helm-pages--page-header)))
 
 (provide 'helm-pages)
 ;;; helm-pages.el ends here
