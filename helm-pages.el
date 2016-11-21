@@ -108,6 +108,11 @@ page number."
         (goto-char (helm-pages--page-start page-number))
         (helm-pages-get-next-header)))))
 
+; Compatibility Shim
+(unless (fboundp 'font-lock-ensure)
+  (defun font-lock-ensure ()
+    (font-lock-fontify-buffer)))
+
 (defun helm-pages-get-pages ()
   "Return a list of (POS . HEADER) pairs.
 
